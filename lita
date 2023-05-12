@@ -1,0 +1,92 @@
+Light In The Attic
+
+How to get a console in EYK
+ Get process names
+eyk ps -a lita-prod
+Start console using a web pod name from the previous step
+eyk ps:console <pod name of a web process> web lita-prod /bin/bash
+Start rails session
+rails c
+
+
+How to delete a bunch of labels
+You need to manually destroy releases as well.
+
+labels=Label.find(1,2,3,etc)
+labels.each do |l|
+l.releases.each do |r|	
+		r.destroy
+end
+l.destroy
+end
+
+How to bring back a bunch of labels
+
+labels=Label.with_deleted.find(356,229,244)
+labels.each do |l|
+l.releases.with_deleted.each do |r|	
+		r.recover
+end
+l.recover
+end
+
+How to import latest releases from website to Spotify
+
+Get a list of quickbooks product numbers from website
+SELECT 	products.id as "products.id",
+		products.created_at as "products.created_at",
+		releases.created_at AS "releases.created_at",
+		products.quickbooks_product_number AS "products.quickbooks_product_number",
+		releases.id AS "releases.id",
+		releases.title AS "releases.title",
+		products.hidden,
+		products.hide_wholesale
+FROM products INNER JOIN releases ON products.buyable_id=releases.id
+WHERE products.deleted_at IS NULL 
+    AND buyable_type = "Release" 
+    AND (hidden=0) 
+    AND (hide_wholesale=0)
+    AND release_format_id NOT IN (4,5,17,21,245,757)
+
+
+
+ 
+Get a list of quickbooks product numbers from Spotify
+Use spreadsheet to determine which numbers aren’t in Spotify e.g. https://docs.google.com/spreadsheets/d/1svfiEdTB2o6QJo6x2_gwd52MGeNNO9mYO1ccWczC0YI/edit?usp=sharing 
+Probably don't include anything from before the first import when Thuy was on board in March of 2020 because theoretically I only imported products that were in her catalog.  After that her catalog might not have been up-to-date
+Check for missing option information:
+SELECT * FROM products INNER JOIN release_formats ON products.release_format_id=release_formats.id
+WHERE products.id IN (37218)
+
+Make updates to release_formats being sure following fields are filled:
+SELECT id,created_at,name,colorway,shopify_product_type,variant_type,shopify_variant_format,shopify_variant_option_format,shopify_tags,apparel_size,new_name
+FROM release_formats
+Generate import file based on the product numbers Release.shopify_csv
+Adjust format and colors (more details to follow)
+Import file
+Make Fixes to Import
+Repeat Upload process and repeat from Import
+
+How to get weights and dims from old website
+Mysql:
+SELECT id,quickbooks_product_number,weight,width,height,depth from products 
+WHERE deleted_at IS NULL 
+    AND buyable_type = “Release”
+
+
+How to change the release dates for all products on a particular date to a new date
+Mysql:
+UPDATE products SET ships_on="2023-03-10 08:00:00" WHERE ships_on >= "2023-02-24" AND ships_on < "2023-02-25"
+
+
+How do bold custom pricing import from website
+Get handle/sku association by doing export from shopify.  Export following fields:
+handle
+sku
+a way to determine if the sku is digital
+remove digital skus
+Do wholesale price lookup with website data
+Only import the skus that have matches on website.  
+
+QUESTIONS:  What about all digital stuff?  Just ignore right?
+
