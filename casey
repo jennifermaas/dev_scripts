@@ -1,0 +1,12 @@
+*** LOGGING INTO Wordpress
+
+https://admin.eachstephome.org/ 
+
+
+*** DEPLOYING
+
+commit to github
+git push origin main
+It takes about 5 minutes to change on the website.
+
+*** 
